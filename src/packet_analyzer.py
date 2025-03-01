@@ -1,6 +1,7 @@
 import os
 import pyshark
 import matplotlib
+
 matplotlib.use('Agg')  # Use a non-GUI backend to avoid tkinter dependency
 import matplotlib.pyplot as plt
 import numpy as np
@@ -79,10 +80,48 @@ def analyze_traffic(pcap_files):
 
 
 def plot_data(data):
-    plot_dir = "plots"
-    os.makedirs(plot_dir, exist_ok=True)  # Create directory if it doesn't exist
+    plot_dir = os.path.abspath(os.path.join(os.getcwd(), "..", "res", "plots"))
+    os.makedirs(plot_dir, exist_ok=True)  # Ensure the res/plots directory exists
 
     apps = list(data.keys())
+
+    # Protocol Distribution Plot - Comparing across apps with percentages
+    plt.figure(figsize=(10, 6))
+    protocol_counts = defaultdict(lambda: defaultdict(int))  # Count protocols for each app
+
+    # Count protocols per app
+    for app in apps:
+        for protocol, count in data[app]['protocol_distribution'].items():
+            protocol_counts[app][protocol] += count  # Accumulate for each app
+
+    # Calculate total packets per app to convert to percentages
+    total_packets_per_app = {app: sum(protocol_counts[app].values()) for app in apps}
+    protocols = set()  # Set of all protocols across apps
+    for app in apps:
+        protocols.update(protocol_counts[app].keys())  # Collect all unique protocols
+
+    # Prepare data for plotting percentages
+    protocol_counts_percentage = {app:
+                                      [100 * protocol_counts[app].get(protocol, 0) / total_packets_per_app[app]
+                                       for protocol in protocols]
+                                  for app in apps}
+
+    protocol_names = list(protocols)  # List of all protocol names
+    width = 0.15  # Bar width
+    x = np.arange(len(apps))
+
+    # Plot bars for each protocol for every app in percentage
+    for i, protocol in enumerate(protocol_names):
+        protocol_data = [protocol_counts_percentage[app][i] for app in apps]
+        plt.bar(x + i * width, protocol_data, width, label=protocol)
+
+    plt.title('Protocol Distribution Across Applications (Percentages)')
+    plt.xlabel('Application')
+    plt.ylabel('Percentage of Packets (%)')
+    plt.xticks(x + width * (len(protocol_names) / 2 - 0.5), apps)
+    plt.legend(title='Protocol')
+    plt.savefig(os.path.join(plot_dir, "protocol_distribution_comparison_percentages.png"))
+    plt.close()
 
     # Average TTL Plot
     plt.figure(figsize=(10, 6))
@@ -113,7 +152,7 @@ def plot_data(data):
     plt.savefig(os.path.join(plot_dir, "tls_versions.png"))
     plt.close()
 
-    # Existing plots for average packet sizes, inter-arrival times, flow volume, and flow sizes
+    # Average Packet Sizes Plot
     plt.figure(figsize=(10, 6))
     avg_packet_sizes = [np.mean(data[app]['packet_sizes']) for app in apps]
     plt.bar(apps, avg_packet_sizes)
@@ -123,17 +162,19 @@ def plot_data(data):
     plt.savefig(os.path.join(plot_dir, "avg_packet_sizes.png"))
     plt.close()
 
+    # Flow Size Plot
     plt.figure(figsize=(10, 6))
-    avg_inter_arrival_times = [np.mean(data[app]['inter_arrival_times']) for app in apps]
-    plt.bar(apps, avg_inter_arrival_times)
-    plt.title('Average Inter-arrival Times Comparison')
+    flow_sizes = [data[app]['flow_size'] for app in apps]
+    plt.bar(apps, flow_sizes)
+    plt.title('Flow Size Comparison')
     plt.xlabel('Application')
-    plt.ylabel('Average Inter-arrival Time (seconds)')
-    plt.savefig(os.path.join(plot_dir, "avg_inter_arrival_times.png"))
+    plt.ylabel('Flow Size')
+    plt.savefig(os.path.join(plot_dir, "flow_size.png"))
     plt.close()
 
-    flow_volumes = [data[app]['flow_volume'] for app in apps]
+    # Flow Volume Plot
     plt.figure(figsize=(10, 6))
+    flow_volumes = [data[app]['flow_volume'] for app in apps]
     plt.bar(apps, flow_volumes)
     plt.title('Flow Volume Comparison')
     plt.xlabel('Application')
@@ -141,28 +182,16 @@ def plot_data(data):
     plt.savefig(os.path.join(plot_dir, "flow_volume.png"))
     plt.close()
 
-    flow_sizes = [data[app]['flow_size'] for app in apps]
+    # Average Inter-Arrival Times Plot
     plt.figure(figsize=(10, 6))
-    plt.bar(apps, flow_sizes)
-    plt.title('Flow Size Comparison')
+    avg_inter_arrival = [np.mean(data[app]['inter_arrival_times']) if data[app]['inter_arrival_times'] else 0 for app in
+                         apps]
+    plt.bar(apps, avg_inter_arrival)
+    plt.title('Average Inter-Arrival Time Comparison')
     plt.xlabel('Application')
-    plt.ylabel('Flow Size (Number of Packets)')
-    plt.savefig(os.path.join(plot_dir, "flow_size.png"))
+    plt.ylabel('Average Inter-Arrival Time (s)')
+    plt.savefig(os.path.join(plot_dir, "avg_inter_arrival_times.png"))
     plt.close()
-
-    protocol_labels = ['TCP', 'UDP', 'HTTP', 'HTTP2', 'TLS']
-    for app in apps:
-        protocol_counts = [data[app]['protocol_distribution'].get(proto, 0) for proto in protocol_labels]
-        total_protocols = sum(protocol_counts)
-        protocol_percentages = [count / total_protocols * 100 if total_protocols > 0 else 0 for count in protocol_counts]
-
-        plt.figure(figsize=(10, 6))
-        plt.bar(protocol_labels, protocol_percentages)
-        plt.title(f'Protocol Distribution for {app}')
-        plt.xlabel('Protocol')
-        plt.ylabel('Percentage Usage (%)')
-        plt.savefig(os.path.join(plot_dir, f"{app}_protocol_distribution.png"))
-        plt.close()
 
 
 def main():
