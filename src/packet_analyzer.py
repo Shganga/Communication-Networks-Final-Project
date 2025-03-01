@@ -200,7 +200,7 @@ def main():
         'Chrome': ('chrome.pcapng', 'chrome.txt'),
         'Firefox': ('firefox.pcapng', 'firefox.txt'),
         'YouTube': ('youtube.pcapng', 'youtube.txt'),
-        'Zoom': ('zoom.pcapng', None)
+        'Zoom': ('zoom.pcapng', 'zoom.txt')
     }
 
     data = analyze_traffic(pcap_files)
