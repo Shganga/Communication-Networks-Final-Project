@@ -87,28 +87,28 @@ def process_pcap_files(pcap_files, output_dir):
     print(f"pcapng file data was saved")
 
 
-def build_random_forest_model(X_train, y_train):
+def build_random_forest_model(training_features, training_labels):
     """
     Create and train a Random Forest model using the given training data.
     """
     model = RandomForestClassifier(n_estimators=100, random_state=42)
-    model.fit(X_train, y_train)
+    model.fit(training_features, training_labels)
     return model
 
 
-def evaluate_model(model, X_test, y_test):
+def evaluate_model(model, testing_features, testing_labels):
     """
     Evaluate the trained model using the test data.
     Returns the model's predictions and accuracy score.
     """
-    predictions = model.predict(X_test)
-    accuracy = accuracy_score(y_test, predictions) * 100
+    predictions = model.predict(testing_features)
+    accuracy = accuracy_score(testing_labels, predictions) * 100
     return predictions, accuracy
 
 
 def prepare_for_comparison_plot(result_df, app_labels):
     """
-    Prepare the actual and predicted counts for accuracy comparison plots.
+    Prepare the actual and predicted counts for accuracy comparison analyzed_data_plots.
     Returns counts for actual, predicted (with flow ID), and predicted (without flow ID).
     """
     actual_counts = result_df["Actual_Label"].value_counts().reindex(app_labels, fill_value=0)
@@ -119,31 +119,31 @@ def prepare_for_comparison_plot(result_df, app_labels):
 
 def plot_comparison(actual_counts, predicted_counts_with_flowid, predicted_counts_without_flowid, app_labels):
     """
-    Create and save side-by-side bar plots comparing actual vs predicted results
+    Create and save side-by-side bar analyzed_data_plots comparing actual vs predicted results
     for both models (with and without flow ID).
     """
-    position_x = np.arange(len(app_labels))
-    width_of_bars = 0.25
-    figure, axes = plt.subplots(1, 2, figsize=(14, 6))
-    axes[0].bar(position_x - width_of_bars / 2, actual_counts, width_of_bars, label="Actual result", color="#FF0000")
-    axes[0].bar(position_x + width_of_bars / 2, predicted_counts_with_flowid, width_of_bars, label="Expected result", color="#008000")
-    axes[0].set_title("Model with Flow Identifier (Scenario 1)")
-    axes[1].bar(position_x - width_of_bars / 2, actual_counts, width_of_bars, label="Actual result", color="#FF0000")
-    axes[1].bar(position_x + width_of_bars / 2, predicted_counts_without_flowid, width_of_bars, label="Expected result", color="#008000")
-    axes[1].set_title("Model without Flow Identifier (Scenario 2)")
-    for ax in axes:
-        ax.set_xlabel("Apps")
-        ax.set_ylabel("Packet count")
-        ax.set_xticks(position_x)
-        ax.set_xticklabels(app_labels, rotation=45, ha="right")
-        ax.legend()
-        ax.grid(axis='y', linestyle='--', alpha=0.9)
+    index_positions = np.arange(len(app_labels))
+    bar_width = 0.25
+    graphic, panels = plt.subplots(1, 2, figsize=(14, 6))
+    panels[0].bar(index_positions - bar_width / 2, actual_counts, bar_width, label="Observed Outcome", color="#FF0000")
+    panels[0].bar(index_positions + bar_width / 2, predicted_counts_with_flowid, bar_width, label="Expected Outcome", color="#008000")
+    panels[0].set_title("Model Including Flow Identifier (Scenario 1)")
+    panels[1].bar(index_positions - bar_width / 2, actual_counts, bar_width, label="Observed Outcome", color="#FF0000")
+    panels[1].bar(index_positions + bar_width / 2, predicted_counts_without_flowid, bar_width, label="Expected Outcome", color="#008000")
+    panels[1].set_title("Model Excluding Flow Identifier (Scenario 2)")
+    for single_panel in panels:
+        single_panel.set_xlabel("Applications")
+        single_panel.set_ylabel("Packet Quantity")
+        single_panel.set_xticks(index_positions)
+        single_panel.set_xticklabels(app_labels, rotation=45, ha="right")
+        single_panel.legend()
+        single_panel.grid(axis='y', linestyle='--', alpha=0.9)
     plt.tight_layout()
     # Ensure 'attacker_plots' folder exists
-    plot_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'res', 'attacker_plots')
-    os.makedirs(plot_directory, exist_ok=True)
-    plot_filename = os.path.join(plot_directory, "Accuracy_Comparison_Graph.png")
-    plt.savefig(plot_filename, dpi=300, bbox_inches='tight')
+    directory_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'res', 'attacker_plots')
+    os.makedirs(directory_path, exist_ok=True)
+    file_name = os.path.join(directory_path, "Accuracy_Comparison_Graph.png")
+    plt.savefig(file_name, dpi=300, bbox_inches='tight')
     plt.close()
     print(f"Graph saved")
 
@@ -169,21 +169,21 @@ def prepare_features_for_training(dataframe):
 
 def main_process(pcap_files, output_dir):
     """
-    Main process for reading PCAP files, training models, and generating plots.
+    Main process for reading PCAP files, training models, and generating analyzed_data_plots.
     """
     process_pcap_files(pcap_files, output_dir)
     combined_data_file = os.path.join(output_dir, "all_csv_data.csv")
     dataset = pd.read_csv(combined_data_file)
-    (X_train_with_flowid, X_test_with_flowid, y_train_with_flowid, y_test_with_flowid), (X_train_without_flowid, X_test_without_flowid, y_train_without_flowid, y_test_without_flowid) = prepare_features_for_training(dataset)
-    model_with_flowid = build_random_forest_model(X_train_with_flowid, y_train_with_flowid)
-    model_without_flowid = build_random_forest_model(X_train_without_flowid, y_train_without_flowid)
-    predictions_with_flowid, accuracy_with_flowid = evaluate_model(model_with_flowid, X_test_with_flowid, y_test_with_flowid)
-    predictions_without_flowid, accuracy_without_flowid = evaluate_model(model_without_flowid, X_test_without_flowid, y_test_without_flowid)
+    (training_data_with_flowid, testing_data_with_flowid, training_labels_with_flowid, testing_labels_with_flowid), (training_data_without_flowid, testing_data_without_flowid, training_labels_without_flowid, testing_labels_without_flowid) = prepare_features_for_training(dataset)
+    model_with_flowid = build_random_forest_model(training_data_with_flowid, training_labels_with_flowid)
+    model_without_flowid = build_random_forest_model(training_data_without_flowid, training_labels_without_flowid)
+    predictions_with_flowid, accuracy_with_flowid = evaluate_model(model_with_flowid, testing_data_with_flowid, testing_labels_with_flowid)
+    predictions_without_flowid, accuracy_without_flowid = evaluate_model(model_without_flowid, testing_data_without_flowid, testing_labels_without_flowid)
     print(f"Accuracy with Flow Identifier (Scenario 1): {accuracy_with_flowid:.2f}%")
     print(f"Accuracy without Flow Identifier (Scenario 2): {accuracy_without_flowid:.2f}%")
     # Preparing results for the comparison plot
-    result_df = X_test_with_flowid.copy()
-    result_df["Actual_Label"] = y_test_with_flowid
+    result_df = testing_data_with_flowid.copy()
+    result_df["Actual_Label"] = testing_labels_with_flowid
     result_df["Predicted_With_Flow_ID"] = predictions_with_flowid
     result_df["Predicted_Without_Flow_ID"] = predictions_without_flowid
     app_labels = sorted(result_df["Actual_Label"].unique())
