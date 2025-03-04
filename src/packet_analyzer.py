@@ -1,8 +1,5 @@
 import os
 import pyshark
-import matplotlib
-
-matplotlib.use('Agg')  # Use a non-GUI backend to avoid tkinter dependency
 import matplotlib.pyplot as plt
 import numpy as np
 from collections import defaultdict, Counter
@@ -80,45 +77,52 @@ def analyze_traffic(pcap_files):
 
 
 def plot_data(data):
-    plot_dir = os.path.abspath(os.path.join(os.getcwd(), "..", "res", "plots"))
-    os.makedirs(plot_dir, exist_ok=True)  # Ensure the res/plots directory exists
+    plot_dir = os.path.abspath(os.path.join(os.getcwd(), "..", "res", "analyzed_data_plots"))
+    os.makedirs(plot_dir, exist_ok=True)  # Ensure the res/analyzed_data_plots directory exists
 
     apps = list(data.keys())
 
     # Protocol Distribution Plot - Comparing across apps with percentages
     plt.figure(figsize=(10, 6))
-    protocol_counts = defaultdict(lambda: defaultdict(int))  # Count protocols for each app
+    # Fixed protocol order
+    fixed_protocol_order = ['TCP', 'UDP', 'HTTP', 'HTTP2', 'TLS']
 
-    # Count protocols per app
+    # Fixed colors for each protocol
+    protocol_colors = {
+        'TCP': '#1f77b4',  # Blue
+        'UDP': '#ff7f0e',  # Orange
+        'HTTP': '#2ca02c',  # Green
+        'HTTP2': '#d62728',  # Red
+        'TLS': '#9467bd'  # Purple
+    }
+
+    # Ensure all protocols appear for every app
+    protocol_counts = {app: {protocol: 0 for protocol in fixed_protocol_order} for app in apps}
     for app in apps:
         for protocol, count in data[app]['protocol_distribution'].items():
-            protocol_counts[app][protocol] += count  # Accumulate for each app
+            protocol_counts[app][protocol] = count  # Use only fixed order
 
-    # Calculate total packets per app to convert to percentages
+    # Convert counts to percentages
     total_packets_per_app = {app: sum(protocol_counts[app].values()) for app in apps}
-    protocols = set()  # Set of all protocols across apps
-    for app in apps:
-        protocols.update(protocol_counts[app].keys())  # Collect all unique protocols
+    protocol_counts_percentage = {
+        app: [100 * protocol_counts[app][protocol] / total_packets_per_app[app] if total_packets_per_app[app] else 0
+              for protocol in fixed_protocol_order]
+        for app in apps
+    }
 
-    # Prepare data for plotting percentages
-    protocol_counts_percentage = {app:
-                                      [100 * protocol_counts[app].get(protocol, 0) / total_packets_per_app[app]
-                                       for protocol in protocols]
-                                  for app in apps}
-
-    protocol_names = list(protocols)  # List of all protocol names
-    width = 0.15  # Bar width
+    # Plot bars in fixed order with fixed colors
+    plt.figure(figsize=(10, 6))
     x = np.arange(len(apps))
+    width = 0.15
 
-    # Plot bars for each protocol for every app in percentage
-    for i, protocol in enumerate(protocol_names):
+    for i, protocol in enumerate(fixed_protocol_order):
         protocol_data = [protocol_counts_percentage[app][i] for app in apps]
-        plt.bar(x + i * width, protocol_data, width, label=protocol)
+        plt.bar(x + i * width, protocol_data, width, label=protocol, color=protocol_colors[protocol])
 
     plt.title('Protocol Distribution Across Applications (Percentages)')
     plt.xlabel('Application')
     plt.ylabel('Percentage of Packets (%)')
-    plt.xticks(x + width * (len(protocol_names) / 2 - 0.5), apps)
+    plt.xticks(x + width * (len(fixed_protocol_order) / 2 - 0.5), apps)
     plt.legend(title='Protocol')
     plt.savefig(os.path.join(plot_dir, "protocol_distribution_comparison_percentages.png"))
     plt.close()

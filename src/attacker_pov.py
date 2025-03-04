@@ -108,7 +108,7 @@ def evaluate_model(model, X_test, y_test):
 
 def prepare_for_comparison_plot(result_df, app_labels):
     """
-    Prepare the actual and predicted counts for accuracy comparison plots.
+    Prepare the actual and predicted counts for accuracy comparison analyzed_data_plots.
     Returns counts for actual, predicted (with flow ID), and predicted (without flow ID).
     """
     actual_counts = result_df["Actual_Label"].value_counts().reindex(app_labels, fill_value=0)
@@ -119,7 +119,7 @@ def prepare_for_comparison_plot(result_df, app_labels):
 
 def plot_comparison(actual_counts, predicted_counts_with_flowid, predicted_counts_without_flowid, app_labels):
     """
-    Create and save side-by-side bar plots comparing actual vs predicted results
+    Create and save side-by-side bar analyzed_data_plots comparing actual vs predicted results
     for both models (with and without flow ID).
     """
     position_x = np.arange(len(app_labels))
@@ -169,7 +169,7 @@ def prepare_features_for_training(dataframe):
 
 def main_process(pcap_files, output_dir):
     """
-    Main process for reading PCAP files, training models, and generating plots.
+    Main process for reading PCAP files, training models, and generating analyzed_data_plots.
     """
     process_pcap_files(pcap_files, output_dir)
     combined_data_file = os.path.join(output_dir, "all_csv_data.csv")
