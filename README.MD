@@ -165,7 +165,7 @@ This function creates and trains a Random Forest model using the given training 
 #### Returns:
 - `model` (RandomForestClassifier): Trained Random Forest model.
 
-### evaluate_model(model, testing_features, testing_labels)
+### assess_performance(model, testing_features, testing_labels)
 
 This function evaluates the trained model using the test data. Returns the model's predictions and accuracy score.
 
