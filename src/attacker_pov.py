@@ -96,14 +96,14 @@ def build_random_forest_model(training_features, training_labels):
     return model
 
 
-def evaluate_model(model, testing_features, testing_labels):
+def assess_performance(model, testing_features, testing_labels):
     """
     Evaluate the trained model using the test data.
     Returns the model's predictions and accuracy score.
     """
-    predictions = model.predict(testing_features)
-    accuracy = accuracy_score(testing_labels, predictions) * 100
-    return predictions, accuracy
+    predicted_outcomes  = model.predict(testing_features)
+    performance_metric  = accuracy_score(testing_labels, predicted_outcomes ) * 100
+    return predicted_outcomes, performance_metric
 
 
 def prepare_for_comparison_plot(result_df, app_labels):
@@ -177,8 +177,8 @@ def main_process(pcap_files, output_dir):
     (training_data_with_flowid, testing_data_with_flowid, training_labels_with_flowid, testing_labels_with_flowid), (training_data_without_flowid, testing_data_without_flowid, training_labels_without_flowid, testing_labels_without_flowid) = prepare_features_for_training(dataset)
     model_with_flowid = build_random_forest_model(training_data_with_flowid, training_labels_with_flowid)
     model_without_flowid = build_random_forest_model(training_data_without_flowid, training_labels_without_flowid)
-    predictions_with_flowid, accuracy_with_flowid = evaluate_model(model_with_flowid, testing_data_with_flowid, testing_labels_with_flowid)
-    predictions_without_flowid, accuracy_without_flowid = evaluate_model(model_without_flowid, testing_data_without_flowid, testing_labels_without_flowid)
+    predictions_with_flowid, accuracy_with_flowid = assess_performance(model_with_flowid, testing_data_with_flowid, testing_labels_with_flowid)
+    predictions_without_flowid, accuracy_without_flowid = assess_performance(model_without_flowid, testing_data_without_flowid, testing_labels_without_flowid)
     print(f"Accuracy with Flow Identifier (Scenario 1): {accuracy_with_flowid:.2f}%")
     print(f"Accuracy without Flow Identifier (Scenario 2): {accuracy_without_flowid:.2f}%")
     # Preparing results for the comparison plot
