@@ -56,13 +56,13 @@ zoom.txt
 2. Ensure the PCAP files and key files are placed in the src directory.
 
 
-3. Run the following command to execute the analysis and generate the plots or go to the ````packet_analyzer.py```` file and run from the run button:
+3. Run the following command to execute the analysis and generate the plots or go to the `packet_analyzer.py` file and run from the run button:
 
 ````bash
 python packet_analyzer.py
 ````
 
-4. To run the ````attacker_pov.py script````, use the following command or go to the ````attacker_pov.py```` file and press the run button:
+4. To run the `attacker_pov.py script`, use the following command or go to the `attacker_pov.py` file and press the run button:
 ````bash
 python attacker_pov.py
 ````
@@ -70,7 +70,7 @@ python attacker_pov.py
 
 
 ## Output
-The analysis results for the ````packet_analyzer.py```` will be saved as plots in the res/analyzed_data_plots directory. The following plots will be generated:
+The analysis results for the `packet_analyzer.py` will be saved as plots in the res/analyzed_data_plots directory. The following plots will be generated:
 ````
 protocol_distribution_comparison_percentages.png: Protocol distribution across applications (percentages).
 
@@ -87,7 +87,7 @@ flow_volume.png: Flow volume comparison.
 avg_inter_arrival_times.png: Average inter-arrival time comparison.
 ````
 
-The analysis results for the ````attacker_pov.py```` will be saved as a plot and a csv containing all the pcapng data, the csv will be stored in res and the plot in res/attacker_plots:
+The analysis results for the `attacker_pov.py```` will be saved as a plot and a csv containing all the pcapng data, the csv will be stored in res and the plot in res/attacker_plots:
 ````
 Accuracy_Comparison_Graph.png: Model accuracy comparison (with and without flow ID).
 
