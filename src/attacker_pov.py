@@ -125,11 +125,11 @@ def plot_comparison(actual_counts, predicted_counts_with_flowid, predicted_count
     index_positions = np.arange(len(app_labels))
     bar_width = 0.25
     graphic, panels = plt.subplots(1, 2, figsize=(14, 6))
-    panels[0].bar(index_positions - bar_width / 2, actual_counts, bar_width, label="Observed Outcome", color="#FF0000")
-    panels[0].bar(index_positions + bar_width / 2, predicted_counts_with_flowid, bar_width, label="Expected Outcome", color="#008000")
+    panels[0].bar(index_positions - bar_width / 2, actual_counts, bar_width, label="Reference Data", color="#FF0000")
+    panels[0].bar(index_positions + bar_width / 2, predicted_counts_with_flowid, bar_width, label="Model Predictions", color="#008000")
     panels[0].set_title("Model Including Flow Identifier (Scenario 1)")
-    panels[1].bar(index_positions - bar_width / 2, actual_counts, bar_width, label="Observed Outcome", color="#FF0000")
-    panels[1].bar(index_positions + bar_width / 2, predicted_counts_without_flowid, bar_width, label="Expected Outcome", color="#008000")
+    panels[1].bar(index_positions - bar_width / 2, actual_counts, bar_width, label="Reference Data", color="#FF0000")
+    panels[1].bar(index_positions + bar_width / 2, predicted_counts_without_flowid, bar_width, label="Model Predictions", color="#008000")
     panels[1].set_title("Model Excluding Flow Identifier (Scenario 2)")
     for single_panel in panels:
         single_panel.set_xlabel("Applications")
