@@ -202,4 +202,6 @@ if __name__ == "__main__":
     ]
 
     output_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'res')
+    os.makedirs(output_directory, exist_ok=True)
+
     main_process(pcap_files_list, output_directory)
